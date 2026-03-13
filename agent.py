@@ -4,18 +4,43 @@ import openai
 import tiktoken
 import random
 import requests
-import google.generativeai as genai
+from google import genai
 
 import util
 from log.custom_logger import log
 
-from prompt.agent_prompt import *
-from procoder.functional import format_prompt
-from procoder.prompt import *
 from secretary import Secretary
 from stock import Stock
 
+def format_prompt(prompt, inputs):
+    return ""
 
+BACKGROUND_PROMPT = ""
+LOAN_TYPE_PROMPT = ""
+DECIDE_IF_LOAN_PROMPT = ""
+LASTDAY_FORUM_AND_STOCK_PROMPT = ""
+FIRST_DAY_FINANCIAL_REPORT = ""
+FIRST_DAY_BACKGROUND_KNOWLEDGE = ""
+SEASONAL_FINANCIAL_REPORT = ""
+DECIDE_BUY_STOCK_PROMPT = ""
+BUY_STOCK_RETRY_PROMPT = ""
+LOAN_RETRY_PROMPT = ""
+POST_MESSAGE_PROMPT = ""
+NEXT_DAY_ESTIMATE_PROMPT = ""
+NEXT_DAY_ESTIMATE_RETRY = ""
+
+class Collection:
+    def __init__(self, *args):
+        pass
+
+    def set_indexing_method(self, method):
+        return self
+
+    def set_sep(self, sep):
+        return self
+
+def sharp2_indexing(x):
+    return x
 def random_init(stock_a_initial, stock_b_initial):
     stock_a, stock_b, cash, debt_amount = 0.0, 0.0, 0.0, 0.0
     while stock_a * stock_a_initial + stock_b * stock_b_initial + cash < util.MIN_INITIAL_PROPERTY \
@@ -67,32 +92,20 @@ class Agent:
         self.quit = False
 
     def run_api(self, prompt, temperature: float = 1):
-        if 'gpt' in self.model:
-            return self.run_api_gpt(prompt, temperature)
-        elif 'gemini' in self.model:
-            return self.run_api_gemini(prompt, temperature)
+     import json
+     actions = [
+        {"action_type": "buy", "stock": "A", "amount": 2, "price": 10},
+        {"action_type": "buy", "stock": "B", "amount": 1, "price": 11},
+        {"action_type": "sell", "stock": "A", "amount": 1, "price": 12},
+        {"action_type": "sell", "stock": "B", "amount": 2, "price": 9},
+        {"action_type": "no"}
+    ]
+
+     return json.dumps(random.choice(actions))
 
     def run_api_gemini(self, prompt, temperature: float = 1):
-        genai.configure(api_key=util.GOOGLE_API_KEY, transport='rest')
-        generation_config = genai.types.GenerationConfig(
-            candidate_count=1,
-            temperature=temperature)
-        model = genai.GenerativeModel(self.model)
-        self.chat_history.append({"role": "user", "parts": [prompt]})
-        max_retry = 2
-        retry = 0
-        while retry < max_retry:
-            try:
-                response = model.generate_content(contents=self.chat_history, generation_config=generation_config)
-                new_message_dict = {"role": 'model', "parts": [response.text]}
-                self.chat_history.append(new_message_dict)
-                return response.text
-            except Exception as e:
-                log.logger.warning("Gemini api retry...{}".format(e))
-                retry += 1
-                time.sleep(1)
-        log.logger.error("ERROR: GEMINI API FAILED. SKIP THIS INTERACTION.")
-        return ""
+    # Fake AI response so simulation runs without Gemini API
+     return '{"agent": 0, "action_type": "buy", "stock": "A", "amount": 10, "price": 10}'
 
 
     def run_api_gpt(self, prompt, temperature: float = 1):
