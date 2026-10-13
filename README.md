@@ -109,7 +109,3 @@ python main.py
 * Deploy as a web service
 
 ---
-
-## Author
-
-Krishna Ghogare
